@@ -291,7 +291,7 @@ supportedShowStatement
     | SHOW DELETE ((FROM | IN) database=multipartIdentifier)?                       #showDelete
     | SHOW ALL? GRANTS                                                              #showGrants
     | SHOW GRANTS FOR userIdentify                                                  #showGrantsForUser
-    | SHOW SYNC JOB ((FROM | IN) database=multipartIdentifier)?                     #showSyncJob    
+    | SHOW SYNC JOB ((FROM | IN) database=multipartIdentifier)?                     #showSyncJob
     | SHOW LOAD PROFILE loadIdPath=STRING_LITERAL? limitClause?                     #showLoadProfile
     | SHOW CREATE REPOSITORY FOR identifier                                         #showCreateRepository
     | SHOW VIEW
@@ -732,14 +732,14 @@ supportedStatsStatement
         (WHERE (stateKey=identifier) EQ (stateValue=STRING_LITERAL))?           #showAnalyze
     | SHOW QUEUED ANALYZE JOBS tableName=multipartIdentifier?
         (WHERE (stateKey=identifier) EQ (stateValue=STRING_LITERAL))?           #showQueuedAnalyzeJobs
+    | ANALYZE DATABASE name=multipartIdentifier
+        (WITH analyzeProperties)* propertyClause?                               #analyzeDatabase
+    | ANALYZE TABLE name=multipartIdentifier partitionSpec?
+        columns=identifierList? (WITH analyzeProperties)* propertyClause?       #analyzeTable
     ;
 
 unsupportedStatsStatement
-    : ANALYZE TABLE name=multipartIdentifier partitionSpec?
-        columns=identifierList? (WITH analyzeProperties)* propertyClause?       #analyzeTable
-    | ANALYZE DATABASE name=multipartIdentifier
-        (WITH analyzeProperties)* propertyClause?                               #analyzeDatabase
-    | ALTER TABLE name=multipartIdentifier SET STATS
+    : ALTER TABLE name=multipartIdentifier SET STATS
         LEFT_PAREN propertyItemList RIGHT_PAREN partitionSpec?                  #alterTableStats
     | ALTER TABLE name=multipartIdentifier (INDEX indexName=identifier)?
         MODIFY COLUMN columnName=identifier
@@ -855,10 +855,10 @@ optionWithoutType
     | (CHAR SET | CHARSET) (charsetName=identifierOrText | DEFAULT)     #setCharset
     | NAMES (charsetName=identifierOrText | DEFAULT)
         (COLLATE collateName=identifierOrText | DEFAULT)?               #setCollate
-    | PASSWORD (FOR userIdentify)? EQ (STRING_LITERAL
-        | (isPlain=PASSWORD LEFT_PAREN STRING_LITERAL RIGHT_PAREN))             #setPassword
-    | LDAP_ADMIN_PASSWORD EQ (STRING_LITERAL
-    | (PASSWORD LEFT_PAREN STRING_LITERAL RIGHT_PAREN))                 #setLdapAdminPassword
+    | PASSWORD (FOR userIdentify)? EQ (pwd=STRING_LITERAL
+        | (isPlain=PASSWORD LEFT_PAREN pwd=STRING_LITERAL RIGHT_PAREN)) #setPassword
+    | LDAP_ADMIN_PASSWORD EQ (pwd=STRING_LITERAL
+        | (PASSWORD LEFT_PAREN pwd=STRING_LITERAL RIGHT_PAREN))         #setLdapAdminPassword
     | variable                                                          #setVariableWithoutType
     ;
 
